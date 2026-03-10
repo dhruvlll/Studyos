@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#6366f1"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="StudyOS"/>
+<title>LectureMate Pro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#07070f;color:#e0e0f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+input,textarea,button,select{font-family:inherit}
+button{cursor:pointer;border:none;transition:all .2s}
+.header{background:#0f0f1a;border-bottom:1px solid #1a1a2e;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.logo-sub{font-size:10px;color:#6366f1;letter-spacing:3px}
+.logo-main{font-size:17px;font-weight:900;background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tabs{display:flex;gap:4px;padding:10px 12px;background:#0f0f1a;border-bottom:1px solid #1a1a2e;overflow-x:auto}
+.tab{padding:7px 12px;border-radius:10px;font-size:12px;font-weight:700;white-space:nowrap;background:#1e1e36;color:#3a3a5a}
+.tab.active{background:#6366f1;color:white}
+.content{padding:14px;max-width:720px;margin:0 auto}
+.card{background:#0f0f1a;border:1px solid #1a1a2e;border-radius:14px;padding:18px;margin-bottom:10px}
+.sec-label{font-size:11px;color:#6366f1;letter-spacing:2px;margin-bottom:3px}
+.sec-title{font-size:17px;font-weight:800;margin-bottom:14px}
+.inp{width:100%;padding:11px 13px;background:#0a0a14;border:1px solid #1e1e36;border-radius:10px;color:#e0e0f0;font-size:14px;outline:none}
+.btn{padding:9px 16px;border-radius:10px;font-weight:700;font-size:13px;background:#1e1e36;color:#3a3a5a}
+.btn.on{background:#6366f1;color:white}
+.btn.green{background:#22c55e;color:white}
+.btn.full{width:100%;padding:14px;font-size:15px}
+.btn.grad{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white}
+.page{display:none}.page.active{display:block}
+.chip{background:#1a1200;border:1px solid #3a2a00;color:#F59E0B;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin:3px}
+.progress-bar{height:4px;background:#1e1e36;border-radius:4px;margin-top:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:4px;transition:width .4s}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
+.modal-overlay.open{display:flex}
+.modal{background:#0f0f1a;border-radius:20px;padding:26px;max-width:400px;width:100%}
+.row-title{font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:7px}
+textarea{resize:vertical;line-height:1.6}
+.badge{font-size:11px;padding:4px 8px;border-radius:20px}
+.stat-val{font-size:22px;font-weight:900}
+.stat-lbl{font-size:12px;color:#3a3a5a;margin-top:2px}
+.schedule-item{margin-bottom:7px;border-radius:11px;overflow:hidden;border:1px solid #1e1e36}
+.schedule-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer}
+.schedule-body{background:#0a0a14;padding:11px 14px;display:none}
+.schedule-body.open{display:block}
+.check-item{display:flex;gap:10px;align-items:flex-start;padding:9px;border-radius:8px;cursor:pointer;margin-bottom:5px}
+.checkbox{width:18px;height:18px;border-radius:4px;flex-shrink:0;margin-top:1px;border:2px solid #3a3a5a;display:flex;align-items:center;justify-content:center}
+.checkbox.done{background:#6366f1;border-color:#6366f1}
+.flip-card{background:#12121e;border:2px solid #1a1a2e;border-radius:16px;padding:36px 22px;text-align:center;cursor:pointer;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .3s;margin-bottom:12px}
+.flip-card.flipped{background:#0a1a2e;border-color:#6366f1}
+.time-block{margin-bottom:7px;border-radius:11px;overflow:hidden;border:1px solid #1e1e36}
+.block-header{padding:9px 13px;background:#0d0d1a;display:flex;justify-content:space-between;align-items:center}
+.block-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#1e1e36}
+.block-cell{padding:10px 12px;cursor:pointer;min-height:52px}
+.pomo-ring{position:relative;width:180px;height:180px;margin:0 auto 13px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo-sub">STUDY OS</div>
+    <div class="logo-main">📚 LectureMate Pro</div>
+  </div>
+  <div id="badges" style="display:flex;gap:6px"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('lectures')">📚 Lectures</button>
+  <button class="tab" onclick="showTab('flashcards')">🃏 Flashcards</button>
+  <button class="tab" onclick="showTab('planner')">🗓️ Planner</button>
+  <button class="tab" onclick="showTab('pomodoro')">🍅 Pomodoro</button>
+  <button class="tab" onclick="showTab('dashboard')">📊 Dashboard</button>
+</div>
+
+<div class="content">
+  <div id="page-lectures" class="page active"></div>
+  <div id="page-flashcards" class="page"></div>
+  <div id="page-planner" class="page"></div>
+  <div id="page-pomodoro" class="page"></div>
+  <div id="page-dashboard" class="page"></div>
+</div>
+
+<!-- Popup Modal -->
+<div id="popup-modal" class="modal-overlay">
+  <div class="modal" id="popup-content"></div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal" style="border:2px solid #22c55e" id="edit-content"></div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+const LS = {
+  get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+
+let state = {
+  lectures: LS.get('lectures',[]),
+  flashDecks: LS.get('flashDecks',[]),
+  dayPlans: LS.get('dayPlans',{}),
+  tgToken: LS.get('tgToken',''),
+  tgChatId: LS.get('tgChatId',''),
+  tgOk: LS.get('tgOk',false),
+  ejServiceId: LS.get('ejServiceId',''),
+  ejTemplateId: LS.get('ejTemplateId',''),
+  ejPublicKey: LS.get('ejPublicKey',''),
+  ejEmail: LS.get('ejEmail',''),
+  ejOk: LS.get('ejOk',false),
+  activeFlashDeck: null,
+  flashCardIdx: 0,
+  flashFlipped: false,
+  flashScores: {},
+  pomMode: 'work',
+  pomSecs: 1500,
+  pomRunning: false,
+  pomTask: '',
+  pomSessions: 0,
+  pomHistory: [],
+  pomInterval: null,
+  planView: 'day',
+  planDate: new Date().toISOString().split('T')[0],
+  planMonth: {y: new Date().getFullYear(), m: new Date().getMonth()},
+  editBlock: null, editType: null, editText: '',
+  openScheduleDay: 0,
+  lectureView: 'list',
+  selectedLecture: null,
+  inputTab: 'text',
+  textInput: '',
+  ytUrl: '',
+  pdfText: '',
+  pdfName: '',
+  sheetUrl: '',
+  sheetData: '',
+  sheetStatus: 'idle',
+  generating: false,
+};
+
+const save = () => {
+  LS.set('lectures',state.lectures);
+  LS.set('flashDecks',state.flashDecks);
+  LS.set('dayPlans',state.dayPlans);
+  LS.set('tgToken',state.tgToken);
+  LS.set('tgChatId',state.tgChatId);
+  LS.set('tgOk',state.tgOk);
+  LS.set('ejServiceId',state.ejServiceId);
+  LS.set('ejTemplateId',state.ejTemplateId);
+  LS.set('ejPublicKey',state.ejPublicKey);
+  LS.set('ejEmail',state.ejEmail);
+  LS.set('ejOk',state.ejOk);
+};
+
+// ── Constants ──────────────────────────────────────────────────────
+const SCHEDULE = [
+  {day:0,label:'DAY 0 — STUDY',emoji:'📚',color:'#06b6d4',tasks:['Read chapter / watch lecture','Quick Capture — brain dump','Draw Mind Map from memory','Sleep — memory consolidation tonight']},
+  {day:1,label:'DAY 1 — RECALL',emoji:'⚡',color:'#8b5cf6',tasks:['Active Recall — blank page write everything','Highlight gaps you couldn\'t remember','Make flashcards for every gap']},
+  {day:2,label:'DAY 2 — APPLY',emoji:'✏️',color:'#3b82f6',tasks:['Practice questions — no solutions first','Ask Why is this true? for each concept','Categorise wrong answers']},
+  {day:3,label:'DAY 3 — TEACH',emoji:'🧑‍🏫',color:'#f97316',tasks:['Feynman Technique — explain to a 12-year-old','Review Day 1 flashcards','Write summary in your own words']},
+  {day:7,label:'DAY 7 — REINFORCE',emoji:'💪',color:'#22c55e',tasks:['Spaced Repetition review','Interleaved Practice — mix 2 older chapters','Redraw Mind Map from memory']},
+  {day:14,label:'DAY 14 — CONSOLIDATE',emoji:'📦',color:'#eab308',tasks:['Spaced Repetition review','Re-attempt Day 2 questions']},
+  {day:30,label:'DAY 30 — LOCK IN',emoji:'🏆',color:'#ef4444',tasks:['Final Active Recall — everything from scratch','Mark as Reviewed ✅']},
+];
+const TIME_BLOCKS = ['12AM–3AM','3AM–6AM','6AM–9AM','9AM–12PM','12PM–3PM','3PM–6PM','6PM–9PM','9PM–12AM'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const POM_MODES = {work:{label:'Focus',min:25,color:'#6366f1'},short:{label:'Short Break',min:5,color:'#22c55e'},long:{label:'Long Break',min:15,color:'#f59e0b'}};
+
+// ── Notifications ──────────────────────────────────────────────────
+async function sendTg(msg) {
+  if (!state.tgToken || !state.tgChatId) return;
+  try { await fetch(`https://api.telegram.org/bot${state.tgToken}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:state.tgChatId,text:msg,parse_mode:'Markdown'})}); } catch {}
+}
+
+const loadEJ = () => new Promise(r=>{
+  if(window.emailjs){r();return;}
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+  s.onload=r; document.head.appendChild(s);
+});
+
+async function sendEmail(subject, body) {
+  if (!state.ejServiceId||!state.ejTemplateId||!state.ejPublicKey||!state.ejEmail) return;
+  try {
+    await loadEJ();
+    window.emailjs.init({publicKey:state.ejPublicKey});
+    await window.emailjs.send(state.ejServiceId,state.ejTemplateId,{to_email:state.ejEmail,subject,message:body});
+  } catch(e){console.error('EmailJS:',e);}
+}
+
+// ── Tab switching ──────────────────────────────────────────────────
+let currentTab = 'lectures';
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const tabs=['lectures','flashcards','planner','pomodoro','dashboard'];
+    t.className = 'tab' + (tabs[i]===tab?' active':'');
+  });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  currentTab = tab;
+  renderPage(tab);
+}
+
+function renderPage(tab) {
+  const el = document.getElementById('page-'+tab);
+  if (tab==='lectures') el.innerHTML = renderLectures();
+  if (tab==='flashcards') el.innerHTML = renderFlashcards();
+  if (tab==='planner') el.innerHTML = renderPlanner();
+  if (tab==='pomodoro') el.innerHTML = renderPomodoro();
+  if (tab==='dashboard') el.innerHTML = renderDashboard();
+  bindEvents(tab);
+}
+
+function refresh() { renderPage(currentTab); updateBadges(); }
+
+function updateBadges() {
+  document.getElementById('badges').innerHTML = 
+    (state.tgOk ? '<span class="badge" style="color:#22c55e;background:#071407;border:1px solid #1a3a1a">✈️ TG</span>' : '') +
+    (state.ejOk ? '<span class="badge" style="color:#60a5fa;background:#071420;border:1px solid #1a3a5a">📧 Email</span>' : '');
+}
+
+// ── LECTURES ───────────────────────────────────────────────────────
+function renderLectures() {
+  if (state.lectureView === 'add') return renderAddLecture();
+  if (state.lectureView === 'detail') return renderLectureDetail();
+  return renderLectureList();
+}
+
+function renderLectureList() {
+  if (!state.lectures.length) return `
+    <div class="card" style="text-align:center;padding:44px">
+      <div style="font-size:44px;margin-bottom:10px">📚</div>
+      <div style="font-weight:700;color:#3a3a5a">No lectures yet</div>
+      <div style="font-size:13px;color:#3a3a5a;margin-top:5px">Add your first lecture to get started</div>
+      <button class="btn grad" style="margin-top:14px;padding:10px 20px" onclick="setLectureView('add')">+ Add Lecture</button>
+    </div>`;
+  
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div><div class="sec-label">ALL LECTURES</div><div class="sec-title">Study Library</div></div>
+    <button class="btn grad" onclick="setLectureView('add')">+ Add</button>
+  </div>`;
+  
+  state.lectures.forEach(l => {
+    const total = SCHEDULE.reduce((s,d)=>s+d.tasks.length,0);
+    const done = SCHEDULE.reduce((s,d)=>s+d.tasks.filter((_,i)=>l.checklist?.[d.day+'-'+i]).length,0);
+    const pct = Math.round((done/total)*100);
+    html += `<div class="card" onclick="selectLecture(${l.id})" style="cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1;margin-right:10px">
+          <div style="font-weight:800;font-size:14px">📖 ${l.topic}</div>
+          <div style="font-size:12px;color:#3a3a5a;margin-top:3px">${new Date(l.startDate).toLocaleDateString()}</div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:${pct===100?'#4ade80':'#6366f1'}">${pct}%</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:11px;color:#3a3a5a;margin-top:5px">${done}/${total} tasks done</div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderAddLecture() {
+  const tabs = [{k:'text',i:'✏️',l:'Text'},{k:'youtube',i:'🎬',l:'YouTube'},{k:'pdf',i:'📄',l:'PDF'},{k:'sheets',i:'📊',l:'Sheets'}];
+  let inputHtml = '';
+  if (state.inputTab==='text') inputHtml = `<div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:8px">PASTE NOTES</div><textarea class="inp" id="textInput" rows="6" placeholder="Paste your lecture notes here…">${state.textInput}</textarea>`;
+  if (state.inputTab==='youtube') inputHtml = `<div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:8px">YOUTUBE URL</div><input class="inp" id="ytInput" value="${state.ytUrl}" placeholder="https://youtube.com/watch?v=..."/>`;
+  if (state.inputTab==='pdf') inputHtml = `<div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:8px">PDF UPLOAD</div>
+    <div onclick="document.getElementById('pdfFile').click()" style="border:2px dashed #2a2a4a;border-radius:12px;padding:28px;text-align:center;cursor:pointer">
+      <div style="font-size:30px;margin-bottom:6px">📄</div>
+      <div style="color:#818cf8;font-weight:700">${state.pdfName||'Tap to select PDF'}</div>
+      <div style="font-size:12px;color:#3a3a5a;margin-top:4px">${state.pdfText?'✅ '+state.pdfText.length+' chars extracted':'Tap to browse'}</div>
+    </div>
+    <input id="pdfFile" type="file" accept=".pdf" style="display:none" onchange="handlePDF(this)"/>`;
+  if (state.inputTab==='sheets') inputHtml = `<div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:8px">GOOGLE SHEETS</div>
+    <input class="inp" id="sheetInput" value="${state.sheetUrl}" placeholder="https://docs.google.com/spreadsheets/d/..."/>
+    <button class="btn" style="width:100%;margin-top:9px;padding:10px;color:#60a5fa" onclick="fetchSheet()">${state.sheetStatus==='loading'?'⏳ Reading…':'📊 Read Sheet'}</button>
+    ${state.sheetStatus==='done'?'<div style="margin-top:8px;padding:10px;background:#071407;border:1px solid #1a3a1a;border-radius:8px;font-size:12px;color:#22c55e">✅ '+state.sheetData.split('\n').length+' rows read</div>':''}
+    ${state.sheetStatus==='error'?'<div style="margin-top:8px;padding:10px;background:#1a0707;border:1px solid #3a1a1a;border-radius:8px;font-size:12px;color:#f87171">❌ Share sheet: Anyone with link → Viewer</div>':''}`;
+
+  const canSubmit = (state.inputTab==='text'&&state.textInput.trim())||(state.inputTab==='youtube'&&state.ytUrl.trim())||(state.inputTab==='pdf'&&state.pdfText.trim())||(state.inputTab==='sheets'&&state.sheetData.trim());
+
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <button class="btn" onclick="setLectureView('list')" style="padding:7px 12px">← Back</button>
+      <div style="font-weight:800;font-size:16px">Add New Lecture</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:11px">
+      ${tabs.map(t=>`<button class="btn ${state.inputTab===t.k?'on':''}" onclick="setInputTab('${t.k}')" style="padding:8px 4px;font-size:11px;text-align:center">${t.i}<br/>${t.l}</button>`).join('')}
+    </div>
+    <div class="card" style="margin-bottom:11px">${inputHtml}</div>
+    ${renderNotifSettings()}
+    <button class="btn ${canSubmit&&!state.generating?'grad':''} full" ${state.generating||!canSubmit?'disabled':''} onclick="generateNotes()" style="${canSubmit&&!state.generating?'':'background:#1e1e36;color:#3a3a5a'}">
+      ${state.generating?'⏳ Generating AI Notes…':'🚀 Generate Notes + Start 30-Day Plan'}
+    </button>`;
+}
+
+function renderNotifSettings() {
+  return `<div class="card" style="margin-bottom:12px">
+    <div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:14px">🔔 NOTIFICATION SETTINGS</div>
+    <div style="padding:13px;background:#0a0a14;border-radius:10px;margin-bottom:10px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px">✈️ Telegram Bot</div>
+      <div style="font-size:11px;color:#3a3a5a;margin-bottom:10px">FREE · Works when app is closed</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <input class="inp" id="tgToken" value="${state.tgToken}" placeholder="Bot Token" style="padding:10px 12px;font-size:13px"/>
+        <input class="inp" id="tgChatId" value="${state.tgChatId}" placeholder="Chat ID" style="padding:10px 12px;font-size:13px"/>
+        <button class="btn ${state.tgToken&&state.tgChatId?'on':''}" id="tgTestBtn" onclick="testTelegram()" style="background:#229ED9;color:white;padding:10px">📨 Send Test Message</button>
+      </div>
+    </div>
+    <div style="padding:13px;background:#0a0a14;border-radius:10px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px">📧 Email via EmailJS</div>
+      <div style="font-size:11px;color:#3a3a5a;margin-bottom:10px">FREE · Direct to inbox</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <input class="inp" id="ejSvcId" value="${state.ejServiceId}" placeholder="Service ID" style="padding:10px 12px;font-size:13px"/>
+        <input class="inp" id="ejTplId" value="${state.ejTemplateId}" placeholder="Template ID" style="padding:10px 12px;font-size:13px"/>
+        <input class="inp" id="ejPubKey" value="${state.ejPublicKey}" placeholder="Public Key" style="padding:10px 12px;font-size:13px"/>
+        <input class="inp" id="ejEmailAddr" value="${state.ejEmail}" placeholder="Your email" style="padding:10px 12px;font-size:13px"/>
+        <button class="btn on" onclick="testEmailJS()" style="background:#2563eb;color:white;padding:10px">📧 Send Test Email</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLectureDetail() {
+  const lec = state.lectures.find(l=>l.id===state.selectedLecture);
+  if (!lec) { state.lectureView='list'; return renderLectureList(); }
+  
+  let schedHtml = SCHEDULE.map(s => {
+    const prog = getProgress(lec, s.day);
+    const isOpen = state.openScheduleDay === s.day;
+    let tasksHtml = s.tasks.map((task,i)=>{
+      const done = !!lec.checklist?.[s.day+'-'+i];
+      return `<div class="check-item ${done?'':'hover'}" onclick="toggleCheck(${lec.id},${s.day},${i})" style="${done?'background:'+s.color+'12':''}">
+        <div class="checkbox ${done?'done':''}" style="${done?'border-color:'+s.color+';background:'+s.color:''}">${done?'<span style="color:white;font-size:11px;font-weight:900">✓</span>':''}</div>
+        <span style="font-size:13px;color:${done?'#3a3a5a':'#c0c0d8'};text-decoration:${done?'line-through':'none'};line-height:1.5">${task}</span>
+      </div>`;
+    }).join('');
+    return `<div class="schedule-item" style="border-color:${prog>0?s.color+'50':'#1e1e36'}">
+      <div class="schedule-header" onclick="toggleScheduleDay(${s.day})" style="background:${prog===100?s.color+'22':prog>0?s.color+'10':'#0d0d1a'}">
+        <span style="font-size:17px">${s.emoji}</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:13px;color:${prog>0?s.color:'#3a3a5a'}">${s.label}</div>
+          <div style="font-size:11px;color:#3a3a5a">${s.day===0?'Today':s.day===1?'Tomorrow':'Day '+s.day}</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:${prog===100?'#4ade80':s.color}">${prog}%</div>
+        <span style="color:#3a3a5a;font-size:13px;transform:${isOpen?'rotate(180deg)':'none'};display:inline-block">▾</span>
+      </div>
+      ${prog>0?`<div style="height:3px;background:#1a1a2a"><div style="height:100%;width:${prog}%;background:${s.color};transition:width .4s"></div></div>`:''}
+      <div class="schedule-body ${isOpen?'open':''}">${tasksHtml}</div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <button class="btn" onclick="setLectureView('list')" style="padding:7px 12px">← Back</button>
+      <div style="font-weight:800;font-size:15px">📖 ${lec.topic}</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="background:#0a0f1e;border:1px solid #1e2a3e;border-radius:10px;padding:12px;margin-bottom:13px">
+        <div style="font-size:11px;color:#4ECDC4;letter-spacing:1px;margin-bottom:5px">⚡ 30-SECOND REVISION</div>
+        <p style="margin:0;font-size:13px;color:#90a8c0;line-height:1.6">${lec.quickRevision}</p>
+      </div>
+      <div style="margin-bottom:13px">
+        <div class="row-title" style="color:#818cf8">🎯 Core Concepts</div>
+        ${(lec.concepts||[]).map((c,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px"><span style="color:#6366f1;font-weight:800;min-width:14px">${i+1}.</span><span style="font-size:13px;color:#b0b0c8;line-height:1.5">${c}</span></div>`).join('')}
+      </div>
+      <div style="margin-bottom:13px">
+        <div class="row-title" style="color:#F59E0B">⚡ Key Facts</div>
+        <div>${(lec.keyFacts||[]).map(f=>`<span class="chip">${f}</span>`).join('')}</div>
+      </div>
+      <div style="margin-bottom:13px">
+        <div class="row-title" style="color:#10B981">🌍 Real-World Example</div>
+        <p style="margin:0;font-size:13px;color:#b0b0c8;line-height:1.5;font-style:italic">"${lec.example}"</p>
+      </div>
+      <div>
+        <div class="row-title" style="color:#f472b6">📝 Exam Angle</div>
+        <p style="margin:0;font-size:13px;color:#b0b0c8;line-height:1.5">${lec.examAngle}</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-label">MASTER CHECKLIST</div>
+      <div class="sec-title">📅 30-Day Schedule</div>
+      ${schedHtml}
+    </div>`;
+}
+
+function getProgress(lec, day) {
+  const s = SCHEDULE.find(x=>x.day===day); if (!s) return 0;
+  const done = s.tasks.filter((_,i)=>lec.checklist?.[day+'-'+i]).length;
+  return Math.round((done/s.tasks.length)*100);
+}
+
+// ── FLASHCARDS ─────────────────────────────────────────────────────
+function renderFlashcards() {
+  if (!state.activeFlashDeck) {
+    if (!state.flashDecks.length) return `<div class="card" style="text-align:center;padding:44px"><div style="font-size:44px;margin-bottom:10px">🃏</div><div style="font-weight:700;color:#3a3a5a">No decks yet</div><div style="font-size:13px;color:#3a3a5a;margin-top:5px">Flashcards auto-generate when you add a lecture</div></div>`;
+    return `<div class="sec-label">FLASHCARD DECKS</div><div class="sec-title">Study Decks</div>` +
+      state.flashDecks.map(d=>`<div class="card" onclick="openDeck(${d.id})" style="cursor:pointer;margin-bottom:9px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-weight:800;font-size:14px">🃏 ${d.topic}</div><div style="font-size:12px;color:#3a3a5a;margin-top:3px">${d.cards.length} cards</div></div>
+          <span style="font-size:20px;color:#3a3a5a">→</span>
+        </div></div>`).join('');
+  }
+  const deck = state.flashDecks.find(d=>d.id===state.activeFlashDeck);
+  if (!deck) { state.activeFlashDeck=null; return renderFlashcards(); }
+  const card = deck.cards[state.flashCardIdx];
+  const total = deck.cards.length;
+  const known = Object.values(state.flashScores).filter(v=>v==='know').length;
+  const review = Object.values(state.flashScores).filter(v=>v==='review').length;
+  const isLast = state.flashCardIdx===total-1;
+  
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <button class="btn" onclick="closeDeck()" style="padding:7px 12px">← Back</button>
+      <div style="font-weight:800;font-size:15px">🃏 ${deck.topic}</div>
+      <div style="margin-left:auto;font-size:12px;color:#3a3a5a">${state.flashCardIdx+1}/${total}</div>
+    </div>
+    <div style="height:4px;background:#1e1e36;border-radius:4px;margin-bottom:14px"><div style="height:100%;width:${(state.flashCardIdx/total)*100}%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:4px"></div></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="card" style="flex:1;text-align:center;padding:12px"><div style="font-size:20px;font-weight:900;color:#22c55e">${known}</div><div style="font-size:11px;color:#3a3a5a">Know it ✅</div></div>
+      <div class="card" style="flex:1;text-align:center;padding:12px"><div style="font-size:20px;font-weight:900;color:#ef4444">${review}</div><div style="font-size:11px;color:#3a3a5a">Review 🔄</div></div>
+    </div>
+    <div class="flip-card ${state.flashFlipped?'flipped':''}" onclick="flipCard()">
+      <div style="font-size:11px;color:${state.flashFlipped?'#818cf8':'#3a3a5a'};letter-spacing:2px;margin-bottom:12px">${state.flashFlipped?'ANSWER':'QUESTION — tap to flip'}</div>
+      <div style="font-size:15px;font-weight:700;line-height:1.6;color:${state.flashFlipped?'#c0d8ff':'#e0e0f0'}">${state.flashFlipped?card.a:card.q}</div>
+    </div>
+    ${state.flashFlipped&&!isLast?`<div style="display:flex;gap:8px">
+      <button onclick="rateCard('review')" style="flex:1;padding:12px;background:#1a0707;border:1px solid #3a1a1a;border-radius:12px;color:#ef4444;font-weight:700;font-size:13px">🔄 Need Review</button>
+      <button onclick="rateCard('know')" style="flex:1;padding:12px;background:#071407;border:1px solid #1a3a1a;border-radius:12px;color:#22c55e;font-weight:700;font-size:13px">✅ Know It!</button>
+    </div>`:''}
+    ${isLast&&state.flashFlipped?`<div class="card" style="text-align:center;margin-top:12px">
+      <div style="font-size:30px;margin-bottom:6px">🎉</div>
+      <div style="font-weight:800;font-size:16px;margin-bottom:4px">Deck Complete!</div>
+      <div style="font-size:13px;color:#3a3a5a">Score: ${known}/${total} known</div>
+      <button class="btn on" onclick="restartDeck()" style="width:100%;padding:11px;margin-top:10px">🔄 Restart</button>
+    </div>`:''}`;
+}
+
+// ── PLANNER ────────────────────────────────────────────────────────
+function renderPlanner() {
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div><div class="sec-label">TIME BLOCK PLANNER</div><div class="sec-title">Daily Planner</div></div>
+    <div style="display:flex;gap:5px">
+      ${['day','week','month'].map(v=>`<button class="btn ${state.planView===v?'on':''}" onclick="setPlanView('${v}')" style="padding:7px 10px;font-size:12px;text-transform:capitalize">${v}</button>`).join('')}
+    </div>
+  </div>`;
+  if (state.planView==='day') html += renderDayView();
+  if (state.planView==='week') html += renderWeekView();
+  if (state.planView==='month') html += renderMonthView();
+  return html;
+}
+
+function getPlan(date, block) { return state.dayPlans[date]?.[block]||{}; }
+
+function renderDayView() {
+  return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <input type="date" class="inp" value="${state.planDate}" onchange="state.planDate=this.value;refresh()" style="width:auto;padding:8px 12px;font-size:13px"/>
+    <div style="font-size:12px;color:#3a3a5a">${new Date(state.planDate+'T12:00:00').toLocaleDateString('en',{weekday:'long',month:'short',day:'numeric'})}</div>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:10px;font-size:12px"><span style="color:#22c55e">● Planned</span><span style="color:#ef4444">● Actual</span></div>` +
+  TIME_BLOCKS.map(block=>{
+    const plan = getPlan(state.planDate, block);
+    return `<div class="time-block">
+      <div class="block-header">
+        <span style="font-size:12px;font-weight:700;color:#6366f1">⏰ ${block}</span>
+        <div style="display:flex;gap:5px">
+          ${plan.planned?'<span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block"></span>':''}
+          ${plan.actual?'<span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block"></span>':''}
+        </div>
+      </div>
+      <div class="block-body">
+        <div class="block-cell" onclick="openEditModal('${block}','planned','${(plan.planned||'').replace(/'/g,"&#39;")}')" style="background:#071407">
+          <div style="font-size:10px;color:#22c55e;letter-spacing:1px;margin-bottom:3px">📋 PLANNED</div>
+          <div style="font-size:12px;color:${plan.planned?'#e0e0f0':'#3a3a5a'};line-height:1.4">${plan.planned||'Tap to add…'}</div>
+        </div>
+        <div class="block-cell" onclick="openEditModal('${block}','actual','${(plan.actual||'').replace(/'/g,"&#39;")}')" style="background:#1a0707">
+          <div style="font-size:10px;color:#ef4444;letter-spacing:1px;margin-bottom:3px">✅ ACTUAL</div>
+          <div style="font-size:12px;color:${plan.actual?'#e0e0f0':'#3a3a5a'};line-height:1.4">${plan.actual||'Tap to add…'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderWeekView() {
+  const s = new Date(state.planDate); s.setDate(s.getDate()-s.getDay());
+  const days = Array.from({length:7},(_,i)=>{const d=new Date(s);d.setDate(d.getDate()+i);return d;});
+  const tPl = days.reduce((acc,d)=>acc+TIME_BLOCKS.filter(b=>getPlan(d.toISOString().split('T')[0],b).planned).length,0);
+  const tAc = days.reduce((acc,d)=>acc+TIME_BLOCKS.filter(b=>getPlan(d.toISOString().split('T')[0],b).actual).length,0);
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-weight:700">Week of ${days[0].toLocaleDateString('en',{month:'short',day:'numeric'})}</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn" onclick="shiftWeek(-1)" style="padding:6px 10px;font-size:12px">◀</button>
+      <button class="btn" onclick="shiftWeek(1)" style="padding:6px 10px;font-size:12px">▶</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+    <div class="card" style="padding:14px"><div style="font-size:24px;font-weight:900;color:#22c55e">${tPl}</div><div style="font-size:12px;color:#3a3a5a">📋 Planned</div></div>
+    <div class="card" style="padding:14px"><div style="font-size:24px;font-weight:900;color:#ef4444">${tAc}</div><div style="font-size:12px;color:#3a3a5a">✅ Actual</div></div>
+  </div>
+  <div class="card"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">
+    <thead><tr><th style="padding:6px;text-align:left;color:#3a3a5a">Block</th>${days.map(d=>`<th style="padding:6px;text-align:center;color:${d.toISOString().split('T')[0]===state.planDate?'#6366f1':'#3a3a5a'}">${DAYS[d.getDay()]}<br/>${d.getDate()}</th>`).join('')}</tr></thead>
+    <tbody>${TIME_BLOCKS.map(block=>`<tr><td style="padding:4px 6px;color:#3a3a5a;font-size:10px;white-space:nowrap">${block.split('–')[0]}</td>${days.map(d=>{const dk=d.toISOString().split('T')[0];const p=getPlan(dk,block);const hp=!!p.planned,ha=!!p.actual;return`<td style="padding:3px;text-align:center" onclick="state.planDate='${dk}';state.planView='day';refresh()"><div style="width:24px;height:17px;border-radius:3px;margin:0 auto;background:${hp&&ha?'#f59e0b20':hp?'#22c55e20':ha?'#ef444420':'#1e1e36'};border:1px solid ${hp&&ha?'#f59e0b':hp?'#22c55e':ha?'#ef4444':'#1a1a2e'};display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:8px">${hp&&ha?'✓':''}</div></td>`;}).join('')}</tr>`).join('')}</tbody>
+  </table></div></div>`;
+}
+
+function renderMonthView() {
+  const {y,m} = state.planMonth;
+  const firstDay = new Date(y,m,1).getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const todayStr = new Date().toISOString().split('T')[0];
+  let cells = '';
+  for(let i=0;i<firstDay;i++) cells+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++) {
+    const dk = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const pl = TIME_BLOCKS.filter(b=>state.dayPlans[dk]?.[b]?.planned).length;
+    const ac = TIME_BLOCKS.filter(b=>state.dayPlans[dk]?.[b]?.actual).length;
+    const isToday=dk===todayStr, isSel=dk===state.planDate;
+    cells+=`<div onclick="state.planDate='${dk}';state.planView='day';refresh()" style="padding:5px 2px;border-radius:7px;cursor:pointer;background:${isSel?'#1e1e3a':isToday?'#0f0f2a':'transparent'};border:1px solid ${isSel?'#6366f1':isToday?'#1e1e36':'transparent'}">
+      <div style="font-size:12px;font-weight:${isToday?900:600};color:${isToday?'#6366f1':'#e0e0f0'}">${d}</div>
+      <div style="display:flex;gap:2px;justify-content:center;margin-top:2px">${pl>0?'<div style="width:4px;height:4px;border-radius:50%;background:#22c55e"></div>':''}${ac>0?'<div style="width:4px;height:4px;border-radius:50%;background:#ef4444"></div>':''}</div>
+    </div>`;
+  }
+  const mPrefix = `${y}-${String(m+1).padStart(2,'0')}`;
+  const mPl = Object.keys(state.dayPlans).filter(k=>k.startsWith(mPrefix)).reduce((s,k)=>s+TIME_BLOCKS.filter(b=>state.dayPlans[k]?.[b]?.planned).length,0);
+  const mAc = Object.keys(state.dayPlans).filter(k=>k.startsWith(mPrefix)).reduce((s,k)=>s+TIME_BLOCKS.filter(b=>state.dayPlans[k]?.[b]?.actual).length,0);
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-weight:800;font-size:15px">${MONTHS[m]} ${y}</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn" onclick="shiftMonth(-1)" style="padding:6px 10px">◀</button>
+      <button class="btn" onclick="shiftMonth(1)" style="padding:6px 10px">▶</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:10px"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center">
+    ${DAYS.map(d=>`<div style="font-size:10px;color:#3a3a5a;font-weight:700;padding:4px">${d}</div>`).join('')}${cells}
+  </div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="card" style="padding:14px"><div style="font-size:24px;font-weight:900;color:#22c55e">${mPl}</div><div style="font-size:12px;color:#3a3a5a">📋 Planned</div></div>
+    <div class="card" style="padding:14px"><div style="font-size:24px;font-weight:900;color:#ef4444">${mAc}</div><div style="font-size:12px;color:#3a3a5a">✅ Actual</div></div>
+  </div>`;
+}
+
+// ── POMODORO ───────────────────────────────────────────────────────
+function renderPomodoro() {
+  const mode = POM_MODES[state.pomMode];
+  const pct = (state.pomSecs/(mode.min*60))*100;
+  const mins = String(Math.floor(state.pomSecs/60)).padStart(2,'0');
+  const secs = String(state.pomSecs%60).padStart(2,'0');
+  const r=44, circ=2*Math.PI*r;
+  return `
+    <div class="sec-label">POMODORO TIMER</div><div class="sec-title">Focus Sessions</div>
+    <div style="display:flex;gap:7px;margin-bottom:16px">
+      ${Object.entries(POM_MODES).map(([k,v])=>`<button class="btn ${state.pomMode===k?'on':''}" onclick="setPomMode('${k}')" style="${state.pomMode===k?'background:'+v.color+';color:white':''};flex:1;padding:8px 5px;font-size:12px">${v.label}</button>`).join('')}
+    </div>
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="pomo-ring">
+        <svg viewBox="0 0 100 100" style="transform:rotate(-90deg);width:100%;height:100%">
+          <circle cx="50" cy="50" r="${r}" fill="none" stroke="#1e1e36" stroke-width="8"/>
+          <circle cx="50" cy="50" r="${r}" fill="none" stroke="${mode.color}" stroke-width="8" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct/100)}" stroke-linecap="round" style="transition:stroke-dashoffset 1s linear"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-size:32px;font-weight:900;color:${mode.color};font-variant-numeric:tabular-nums">${mins}:${secs}</div>
+          <div style="font-size:12px;color:#3a3a5a;margin-top:3px">${mode.label}</div>
+        </div>
+      </div>
+      <input class="inp" id="pomTask" value="${state.pomTask}" placeholder="What are you working on?" oninput="state.pomTask=this.value" style="margin-bottom:12px;text-align:center"/>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button onclick="togglePom()" style="background:${mode.color};color:white;padding:12px 26px;font-size:14px;border-radius:50px;border:none;font-weight:700;cursor:pointer">${state.pomRunning?'⏸ Pause':'▶ Start'}</button>
+        <button class="btn" onclick="resetPom()" style="padding:12px 16px;font-size:14px;border-radius:50px">⟳</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="card" style="flex:1;text-align:center;padding:13px"><div style="font-size:24px;font-weight:900;color:${mode.color}">${state.pomSessions}</div><div style="font-size:12px;color:#3a3a5a">Sessions</div></div>
+      <div class="card" style="flex:1;text-align:center;padding:13px"><div style="font-size:24px;font-weight:900;color:${mode.color}">${state.pomSessions*25}</div><div style="font-size:12px;color:#3a3a5a">Minutes</div></div>
+    </div>
+    ${state.pomHistory.length?`<div class="card"><div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:10px">SESSION HISTORY</div>${state.pomHistory.map((h,i)=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:${i<state.pomHistory.length-1?'1px solid #1e1e36':'none'}"><span style="font-size:13px">🍅 ${h.task||'Focus session'}</span><span style="font-size:12px;color:#3a3a5a">${h.mins}m · ${h.at}</span></div>`).join('')}</div>`:''}`;
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────────────
+function renderDashboard() {
+  const totalTasks = state.lectures.reduce((s,l)=>s+SCHEDULE.reduce((ss,d)=>ss+d.tasks.length,0),0);
+  const doneTasks = state.lectures.reduce((s,l)=>s+SCHEDULE.reduce((ss,d)=>ss+d.tasks.filter((_,i)=>l.checklist?.[d.day+'-'+i]).length,0),0);
+  const planBlocks = Object.values(state.dayPlans).reduce((s,d)=>s+Object.values(d).filter(b=>b.planned).length,0);
+  const actBlocks = Object.values(state.dayPlans).reduce((s,d)=>s+Object.values(d).filter(b=>b.actual).length,0);
+  const consistency = planBlocks>0?Math.round((actBlocks/planBlocks)*100):0;
+  const stats = [
+    {label:'Lectures',val:state.lectures.length,icon:'📚',col:'#6366f1'},
+    {label:'Tasks Done',val:`${doneTasks}/${totalTasks}`,icon:'✅',col:'#22c55e'},
+    {label:'Flash Decks',val:state.flashDecks.length,icon:'🃏',col:'#f59e0b'},
+    {label:'Planned',val:planBlocks,icon:'📋',col:'#06b6d4'},
+    {label:'Actual',val:actBlocks,icon:'✅',col:'#ef4444'},
+    {label:'Consistency',val:consistency+'%',icon:'🎯',col:'#c084fc'},
+  ];
+  const last7 = Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d;});
+  const maxB = Math.max(...last7.map(d=>{const k=d.toISOString().split('T')[0];return Object.values(state.dayPlans[k]||{}).filter(b=>b.planned||b.actual).length;}),1);
+  const r=40,circ=2*Math.PI*r;
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div><div class="sec-label">OVERVIEW</div><div class="sec-title">Dashboard</div></div>
+      <button class="btn green" onclick="exportCSV()" style="padding:8px 12px;font-size:12px">📊 CSV</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
+      ${stats.map(s=>`<div class="card" style="padding:14px"><div style="font-size:20px;margin-bottom:3px">${s.icon}</div><div class="stat-val" style="color:${s.col}">${s.val}</div><div class="stat-lbl">${s.label}</div></div>`).join('')}
+    </div>
+    ${state.lectures.length?`<div class="card" style="margin-bottom:12px"><div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:10px">LECTURE PROGRESS</div>${state.lectures.map(l=>{const total=SCHEDULE.reduce((s,d)=>s+d.tasks.length,0),done=SCHEDULE.reduce((s,d)=>s+d.tasks.filter((_,i)=>l.checklist?.[d.day+'-'+i]).length,0),pct=Math.round((done/total)*100);return`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:700">📖 ${l.topic}</span><span style="font-size:12px;color:${pct===100?'#4ade80':'#6366f1'};font-weight:700">${pct}%</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${pct===100?'#22c55e':'linear-gradient(90deg,#6366f1,#8b5cf6)'}"></div></div></div>`;}).join('')}</div>`:''}
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:12px">LAST 7 DAYS</div>
+      <div style="display:flex;gap:6px;align-items:flex-end;height:70px">
+        ${last7.map(d=>{const k=d.toISOString().split('T')[0];const pl=Object.values(state.dayPlans[k]||{}).filter(b=>b.planned).length;const ac=Object.values(state.dayPlans[k]||{}).filter(b=>b.actual).length;return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:60px"><div style="flex:1;height:${Math.max((pl/maxB)*58,3)}px;background:#22c55e;border-radius:3px 3px 0 0;opacity:.8"></div><div style="flex:1;height:${Math.max((ac/maxB)*58,3)}px;background:#ef4444;border-radius:3px 3px 0 0;opacity:.8"></div></div><div style="font-size:10px;color:#3a3a5a">${DAYS[d.getDay()]}</div></div>`;}).join('')}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:6px;font-size:11px"><span style="color:#22c55e">■ Planned</span><span style="color:#ef4444">■ Actual</span></div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:10px">CONSISTENCY</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="position:relative;width:76px;height:76px;flex-shrink:0">
+          <svg viewBox="0 0 100 100" style="transform:rotate(-90deg);width:100%;height:100%">
+            <circle cx="50" cy="50" r="${r}" fill="none" stroke="#1e1e36" stroke-width="14"/>
+            <circle cx="50" cy="50" r="${r}" fill="none" stroke="${consistency>=80?'#22c55e':consistency>=50?'#f59e0b':'#ef4444'}" stroke-width="14" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-consistency/100)}" stroke-linecap="round"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:${consistency>=80?'#22c55e':consistency>=50?'#f59e0b':'#ef4444'}">${consistency}%</div>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:14px">${consistency>=80?'Excellent! 🔥':consistency>=50?'Good Progress 👍':'Keep Going! 💪'}</div>
+          <div style="font-size:12px;color:#3a3a5a;margin-top:3px">${actBlocks} of ${planBlocks} blocks completed</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Event Handlers ─────────────────────────────────────────────────
+function bindEvents(tab) {
+  if (tab==='lectures' && state.lectureView==='add') {
+    const ti = document.getElementById('textInput');
+    if (ti) ti.oninput = ()=>state.textInput=ti.value;
+    const yi = document.getElementById('ytInput');
+    if (yi) yi.oninput = ()=>state.ytUrl=yi.value;
+    const si = document.getElementById('sheetInput');
+    if (si) si.oninput = ()=>state.sheetUrl=si.value;
+    const tg = document.getElementById('tgToken');
+    if (tg) tg.oninput = ()=>{state.tgToken=tg.value;save();};
+    const tc = document.getElementById('tgChatId');
+    if (tc) tc.oninput = ()=>{state.tgChatId=tc.value;save();};
+    const s1=document.getElementById('ejSvcId'),s2=document.getElementById('ejTplId'),s3=document.getElementById('ejPubKey'),s4=document.getElementById('ejEmailAddr');
+    if(s1)s1.oninput=()=>{state.ejServiceId=s1.value;save();};
+    if(s2)s2.oninput=()=>{state.ejTemplateId=s2.value;save();};
+    if(s3)s3.oninput=()=>{state.ejPublicKey=s3.value;save();};
+    if(s4)s4.oninput=()=>{state.ejEmail=s4.value;save();};
+  }
+}
+
+function setLectureView(v) { state.lectureView=v; refresh(); }
+function setInputTab(t) { state.inputTab=t; refresh(); }
+function selectLecture(id) { state.selectedLecture=id; state.lectureView='detail'; refresh(); }
+
+function toggleScheduleDay(day) {
+  state.openScheduleDay = state.openScheduleDay===day ? -1 : day;
+  refresh();
+}
+
+function toggleCheck(lectureId, day, idx) {
+  const l = state.lectures.find(l=>l.id===lectureId);
+  if (!l) return;
+  if (!l.checklist) l.checklist={};
+  const key = day+'-'+idx;
+  l.checklist[key] = !l.checklist[key];
+  save(); refresh();
+}
+
+function handlePDF(input) {
+  const file = input.files[0]; if (!file) return;
+  state.pdfName = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const buf = e.target.result;
+    const str = new TextDecoder('latin1').decode(new Uint8Array(buf));
+    const parts = [];
+    for (const m of str.matchAll(/BT[\s\S]*?ET/g))
+      for (const t of m[0].matchAll(/\((.*?)\)\s*T[jJ]/g))
+        parts.push(t[1].replace(/\\[()\\]/g,'').replace(/[^\x20-\x7E]/g,' '));
+    const text = parts.join(' ').replace(/\s+/g,' ').trim();
+    state.pdfText = text.length>50 ? text.substring(0,3000) : 'Could not extract text. Please paste manually.';
+    refresh();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function fetchSheet() {
+  const url = state.sheetUrl;
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (!m) { state.sheetStatus='error'; refresh(); return; }
+  state.sheetStatus='loading'; refresh();
+  try {
+    const res = await fetch(`https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv`);
+    if (!res.ok) throw new Error();
+    const csv = await res.text();
+    const rows = csv.split('\n').map(r=>r.split(',').map(c=>c.replace(/^"|"$/g,'').trim()).filter(Boolean).join(' | ')).filter(r=>r.trim()).slice(0,100);
+    state.sheetData = rows.join('\n').substring(0,3000);
+    state.sheetStatus='done';
+  } catch { state.sheetStatus='error'; }
+  refresh();
+}
+
+async function generateNotes() {
+  state.generating = true; refresh();
+  let content = '';
+  if (state.inputTab==='text') content = state.textInput;
+  else if (state.inputTab==='pdf') content = state.pdfText;
+  else if (state.inputTab==='sheets') content = 'Spreadsheet data:\n'+state.sheetData;
+  else if (state.inputTab==='youtube') {
+    const m = state.ytUrl.match(/(?:v=|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+    if (m) { try { const r=await fetch(`https://www.youtube.com/oembed?url=https://youtube.com/watch?v=${m[1]}&format=json`); const d=await r.json(); content=`YouTube: "${d.title}" by ${d.author_name}`; } catch { content='YouTube URL: '+state.ytUrl; } }
+    else content = 'YouTube URL: '+state.ytUrl;
+  }
+  let notes = null;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
+        messages:[{role:'user',content:`Create structured study notes from:\n\n${content}\n\nRespond ONLY in JSON (no backticks):\n{"topic":"name","concepts":["c1","c2","c3","c4"],"keyFacts":["f1","f2","f3"],"example":"example","examAngle":"angle","quickRevision":"2-3 sentences","flashcards":[{"q":"q1","a":"a1"},{"q":"q2","a":"a2"},{"q":"q3","a":"a3"},{"q":"q4","a":"a4"},{"q":"q5","a":"a5"}]}`}]})
+    });
+    const data = await res.json();
+    notes = JSON.parse(data.content?.find(b=>b.type==='text')?.text?.replace(/```json|```/g,'').trim()||'null');
+  } catch {}
+  if (!notes) notes={topic:'Lecture',concepts:['Idea 1','Idea 2','Idea 3'],keyFacts:['Fact 1','Fact 2'],example:'A real-world example.',examAngle:'Core concepts.',quickRevision:'Review key ideas.',flashcards:[{q:'Main topic?',a:'Your topic'},{q:'Key concept?',a:'Core idea'}]};
+  const lecture = {id:Date.now(),topic:notes.topic,concepts:notes.concepts,keyFacts:notes.keyFacts,example:notes.example,examAngle:notes.examAngle,quickRevision:notes.quickRevision,startDate:new Date().toISOString(),checklist:{}};
+  state.lectures.unshift(lecture);
+  if (notes.flashcards?.length) state.flashDecks.unshift({id:Date.now(),topic:notes.topic,cards:notes.flashcards,created:new Date().toISOString()});
+  sendTg(`🚀 *Study plan started!*\n\n📖 *${notes.topic}*\n\nReminders: Day 1, 2, 3, 7, 14, 30 ✅`);
+  sendEmail(`🚀 LectureMate — Study Plan: ${notes.topic}`,`Your 30-day study plan has started!\n\n📖 Topic: ${notes.topic}\n\nSchedule: Day 0→Study, 1→Recall, 2→Apply, 3→Teach, 7→Reinforce, 14→Consolidate, 30→Lock In\n\n— LectureMate Pro`);
+  state.generating=false; state.textInput=''; state.ytUrl=''; state.pdfText=''; state.pdfName=''; state.sheetUrl=''; state.sheetData=''; state.sheetStatus='idle';
+  state.selectedLecture=lecture.id; state.lectureView='detail';
+  save(); refresh();
+}
+
+async function testTelegram() {
+  const token = document.getElementById('tgToken')?.value||state.tgToken;
+  const chatId = document.getElementById('tgChatId')?.value||state.tgChatId;
+  state.tgToken=token; state.tgChatId=chatId;
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:'✅ *LectureMate Pro connected!* Reminders will arrive on Day 1, 2, 3, 7, 14 & 30 🚀',parse_mode:'Markdown'})});
+    state.tgOk=true; save(); updateBadges(); alert('✅ Telegram connected!');
+  } catch { alert('❌ Failed. Check token and chat ID.'); }
+}
+
+async function testEmailJS() {
+  const s1=document.getElementById('ejSvcId')?.value||state.ejServiceId;
+  const s2=document.getElementById('ejTplId')?.value||state.ejTemplateId;
+  const s3=document.getElementById('ejPubKey')?.value||state.ejPublicKey;
+  const s4=document.getElementById('ejEmailAddr')?.value||state.ejEmail;
+  state.ejServiceId=s1;state.ejTemplateId=s2;state.ejPublicKey=s3;state.ejEmail=s4;
+  try {
+    await loadEJ();
+    window.emailjs.init({publicKey:s3});
+    await window.emailjs.send(s1,s2,{to_email:s4,subject:'✅ LectureMate Pro — Email Connected!',message:'Your email reminders are set up! Stay consistent! 🚀'});
+    state.ejOk=true; save(); updateBadges(); alert('✅ Email connected!');
+  } catch(e) { alert('❌ Email failed. Check credentials.\n'+e.message); }
+}
+
+// Flash
+function openDeck(id) { state.activeFlashDeck=id; state.flashCardIdx=0; state.flashFlipped=false; state.flashScores={}; refresh(); }
+function closeDeck() { state.activeFlashDeck=null; refresh(); }
+function flipCard() { state.flashFlipped=!state.flashFlipped; refresh(); }
+function rateCard(rating) { state.flashScores[state.flashCardIdx]=rating; state.flashCardIdx++; state.flashFlipped=false; refresh(); }
+function restartDeck() { state.flashCardIdx=0; state.flashFlipped=false; state.flashScores={}; refresh(); }
+
+// Planner
+function setPlanView(v) { state.planView=v; refresh(); }
+function shiftWeek(dir) { const d=new Date(state.planDate); d.setDate(d.getDate()+dir*7); state.planDate=d.toISOString().split('T')[0]; refresh(); }
+function shiftMonth(dir) { let {y,m}=state.planMonth; m+=dir; if(m<0){m=11;y--;}if(m>11){m=0;y++;} state.planMonth={y,m}; refresh(); }
+
+function openEditModal(block, type, text) {
+  state.editBlock=block; state.editType=type; state.editText=text;
+  const color = type==='planned'?'#22c55e':'#ef4444';
+  document.getElementById('edit-content').style.borderColor=color;
+  document.getElementById('edit-content').innerHTML=`
+    <div style="font-size:11px;color:${color};letter-spacing:2px;margin-bottom:5px">${type==='planned'?'📋 PLANNED':'✅ ACTUAL'}</div>
+    <div style="font-weight:800;font-size:15px;margin-bottom:12px">⏰ ${block}</div>
+    <textarea id="editText" class="inp" rows="4" style="margin-bottom:12px" placeholder="${type==='planned'?'What do you plan to do?':'What did you actually do?'}">${text}</textarea>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="closeEditModal()" style="flex:1">Cancel</button>
+      <button class="btn" onclick="saveEdit()" style="flex:1;background:${color};color:white">Save</button>
+    </div>`;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
+function saveEdit() {
+  const text = document.getElementById('editText').value;
+  const date = state.planDate;
+  if (!state.dayPlans[date]) state.dayPlans[date]={};
+  if (!state.dayPlans[date][state.editBlock]) state.dayPlans[date][state.editBlock]={};
+  state.dayPlans[date][state.editBlock][state.editType]=text;
+  save(); closeEditModal(); refresh();
+}
+
+// Pomodoro
+function setPomMode(m) { state.pomMode=m; state.pomSecs=POM_MODES[m].min*60; state.pomRunning=false; clearInterval(state.pomInterval); refresh(); }
+function togglePom() {
+  state.pomRunning=!state.pomRunning;
+  if (state.pomRunning) {
+    state.pomInterval=setInterval(()=>{
+      state.pomSecs--;
+      if (state.pomSecs<=0) {
+        clearInterval(state.pomInterval); state.pomRunning=false;
+        if (state.pomMode==='work') {
+          state.pomSessions++;
+          state.pomHistory.unshift({task:state.pomTask,at:new Date().toLocaleTimeString(),mins:25});
+          if (state.pomHistory.length>10) state.pomHistory.pop();
+          sendTg(`🍅 *Pomodoro complete!*\n\nTask: ${state.pomTask||'Focus session'}\n${state.pomSessions} sessions today`);
+          sendEmail('🍅 Pomodoro Done!',`${POM_MODES[state.pomMode].min}-min session complete!\nTask: ${state.pomTask||'Focus session'}`);
+        }
+        save();
+      }
+      if (currentTab==='pomodoro') renderPage('pomodoro');
+    },1000);
+  } else { clearInterval(state.pomInterval); }
+  if (currentTab==='pomodoro') renderPage('pomodoro');
+}
+function resetPom() { state.pomSecs=POM_MODES[state.pomMode].min*60; state.pomRunning=false; clearInterval(state.pomInterval); refresh(); }
+
+// Export
+function exportCSV() {
+  const rows=[['Date','Block','Planned','Actual']];
+  Object.entries(state.dayPlans).forEach(([date,blocks])=>Object.entries(blocks).forEach(([block,val])=>{if(val.planned||val.actual)rows.push([date,block,val.planned||'',val.actual||'']);}));
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='study_progress.csv';a.click();
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+renderPage('lectures');
+updateBadges();
+</script>
+</body>
+</html>
